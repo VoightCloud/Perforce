@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: perforce-pv
+spec:
+  capacity:
+    storage: 1000Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: perforce-pvc
+    namespace: sourcecontrol
+  iscsi:
+    chapAuthSession: false
+    chapAuthDiscovery: false
+    targetPortal: 192.168.137.3:3260
+    iqn: 'iqn.2000-01.com.synology:drive.Perforce.402fcc5ed94'
+    lun: 01
+    fsType: 'ext4'
+    readOnly: false
+
+#  nfs:
+#    server: 192.168.137.3
+#    path: "/volume1/OpenLDAP"
+#  mountOptions:
+#    - nfsvers=4.1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: perforce-pvc
+  namespace: sourcecontrol
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1000Gi
+  volumeName: "perforce-pv"

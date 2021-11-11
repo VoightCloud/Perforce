@@ -1,0 +1,9 @@
+- name: Install Perforce
+  hosts: localhost
+  connection: local
+
+  vars:
+    namespace: sourcecontrol
+
+  roles:
+    - perforce

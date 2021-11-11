@@ -1,0 +1,59 @@
+- name: Install Openshift Python Library
+  command: pip3 install openshift
+
+- name: Create namespace
+  community.kubernetes.k8s:
+    name: "{{ namespace }}"
+    api_version: v1
+    kind: namespace
+    state: present
+
+- name: Add Voight.org Certificates
+  kubernetes.core.helm:
+    name: "{{ namespace }}-certificates"
+    chart_ref: ./roles/perforce/files/certificates
+    release_namespace: "{{ namespace }}"
+    release_values:
+      namespace: "{{ namespace }}"
+      tls:
+        key: "{{ voightorgkey }}"
+        crt: "{{ voightorgcrt }}"
+        ca: "{{ voightorgca }}"
+
+- name: Add Perforce Secrets
+  kubernetes.core.helm:
+    name: "{{ namespace }}-secrets"
+    chart_ref: ./roles/perforce/files/secrets
+    release_namespace: "{{ namespace }}"
+    release_values:
+      namespace: "{{ namespace }}"
+      P4:
+        admin: "{{ p4user }}"
+        password: "{{ p4Password }}"
+
+- name: Add Perforce Persistence
+  kubernetes.core.helm:
+    name: "{{ deployment }}-persistence"
+    chart_ref: ./roles/perforce/files/persistence
+    release_namespace: "{{ namespace }}"
+    release_values:
+      namespace: "{{ namespace }}"
+
+- name: Apply Perforce
+  kubernetes.core.helm:
+    name: "{{ deployment }}"
+    chart_ref: ./perforce-server
+    release_namespace: "{{ namespace }}"
+    release_values:
+      image:
+        tag: 1.0-amd64
+      persistence:
+        enabled: true
+        existingClaim: perforce-pvc
+      service:
+        loadBalancerIP: 192.168.137.76
+        type: LoadBalancer
+        port: 1666
+      existingSecret: "perforce-credentials"
+      logLevel: info
+
