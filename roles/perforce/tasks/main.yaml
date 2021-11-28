@@ -54,7 +54,7 @@
     release_namespace: "{{ namespace }}"
     release_values:
       image:
-        tag: 1.7-amd64
+        tag: 1.13-amd64
       persistence:
         enabled: true
         existingClaim: perforce-pvc

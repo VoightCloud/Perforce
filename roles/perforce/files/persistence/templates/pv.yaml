@@ -6,7 +6,7 @@ spec:
   capacity:
     storage: 1000Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   claimRef:
     name: perforce-pvc
@@ -34,7 +34,7 @@ metadata:
 spec:
   storageClassName: ""
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 1000Gi
