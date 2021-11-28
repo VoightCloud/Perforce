@@ -33,6 +33,12 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: P4PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.existingSecret }}"
+                  key: P4PASSWD
           ports:
             - name: perforce
               containerPort: 1666
@@ -40,20 +46,34 @@ spec:
           volumeMounts:
             - name: data-dir
               mountPath: /data
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 1666
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 1666
+            - name: ldap-file
+              mountPath: /root/p4-ldap.txt
+              subPath: p4-ldap.txt
+            - name: ldap-groups
+              mountPath: /root/p4-ldap-groups.txt
+              subPath: p4-ldap-groups.txt
+          livenessProbe:
+            tcpSocket:
+              port: 1666
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 1666
+            initialDelaySeconds: 5
+            periodSeconds: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: data-dir
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
+        - name: ldap-file
+          configMap:
+            name: perforce-ldap
+        - name: ldap-groups
+          configMap:
+            name: perforce-groups
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

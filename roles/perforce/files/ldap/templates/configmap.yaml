@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: perforce-ldap
+  namespace: {{ .Values.namespace }}
+data:
+  p4-ldap.txt: |
+    Name:  VoightCloud
+    Host:  openldap.authentication.svc.cluster.local
+    Port:  389
+    Encryption:  none
+    BindMethod:  search
+    SearchBaseDN: ou=people,dc=voight,dc=org
+    SearchFilter: (&(objectClass=inetOrgPerson)(ou=developers)(uid=%user%))
+    SearchScope: subtree
+    GroupBaseDN: ou=groups,dc=voight,dc=org
+    GroupSearchFilter: (&(objectClass=posixGroup)(cn=developers)(memberUid=%user%))
+    GroupSearchScope: subtree
+    AttributeUid: uid
+    AttributeName: cn
+    AttributeEmail: mail
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: perforce-groups
+  namespace: {{ .Values.namespace }}
+data:
+  p4-ldap-groups.txt: |
+    Group:	p4users
+    Owners: p4admin
+    MaxResults:	unset
+    MaxScanRows:	unset
+    MaxLockTime:	unset
+    Timeout:	43200
+    PasswordTimeout:	unset
+    LdapConfig: VoightCloud
+    LdapSearchQuery: (&(objectClass=posixGroup)(cn=developers))
+    LdapUserAttribute: memberUid

@@ -20,6 +20,14 @@
         crt: "{{ voightorgcrt }}"
         ca: "{{ voightorgca }}"
 
+- name: Add Perforce LDAP
+  kubernetes.core.helm:
+    name: "{{ deployment }}-ldap"
+    chart_ref: ./roles/perforce/files/ldap
+    release_namespace: "{{ namespace }}"
+    release_values:
+      namespace: "{{ namespace }}"
+
 - name: Add Perforce Secrets
   kubernetes.core.helm:
     name: "{{ namespace }}-secrets"
@@ -46,7 +54,7 @@
     release_namespace: "{{ namespace }}"
     release_values:
       image:
-        tag: 1.0-amd64
+        tag: 1.7-amd64
       persistence:
         enabled: true
         existingClaim: perforce-pvc
